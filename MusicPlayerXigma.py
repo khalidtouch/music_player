@@ -20,20 +20,19 @@ text.pack()
 def browse_file():
     global filename
     filename = filedialog.askopenfile()
-    if filename == '':
-        return False
-    else:
-        return True
+    loadThenPlay(filename)
+    
 
 def about_us():
     messagebox.showinfo('Cosmic Music', 'This Music Player was designed by Xigma Interns 2019.')
 
-def isLoaded():
-    if (browse_file()):
+def notLoaded(any_file):
+    if any_file is None:
         return True
-    else:
-        return False
 
+
+def printFilename(event):
+    print(filename)
 
         # MenuBar
 menubar = Menu(window)
@@ -65,14 +64,34 @@ menubar.add_cascade(label = 'Exit', command = window.destroy)
 
 
     # control functions
+pause = False
+
+def loadThenPlay(any_file):
+    mixer.music.load(any_file)
+    mixer.music.play()
+    statusbar['text'] = 'Music Now Playing'
+
+def resume_music():
+    global pause_state
+    mixer.music.unpause()
+    pause_state = False
+
+def pause_music(event):
+    mixer.music.pause()
+    pause_state = True
+
+def music_stopped():
+    if statusbar['text'] == 'Music Stopped':
+        return True
+
 def play_button(event):
 
     try:
-       
-        mixer.music.load(filename)
-        mixer.music.play()
-        statusbar['text'] = 'Music Now Playing'
-    except:
+        resume_music()
+        if music_stopped():
+            loadThenPlay(filename)
+    
+    except: 
         messagebox.showerror('Cosmic Music','File not selected')
 
 
@@ -89,20 +108,10 @@ def volume_control(val):
     volume = int(val) / 100
     mixer.music.set_volume(volume)
 
-def pause_music(event):
-    mixer.music.pause()
 
-def resume_music(event):
-    mixer.music.unpause()
 
-def leftClick(event):
-    print('leftClick')
 
-def rightClick(event):
-    print('rightClick')
 
-def middleClick(event):
-    print('middleClick')
 
 
 
@@ -129,7 +138,7 @@ pause_Button.pack()
 stop_Button = Button(window, image = stop_photo)
 stop_Button.bind('<Button-1>', stop_button)
 stop_Button.bind('<Button-2>', stop_button)
-stop_Button.bind('<Button-3>', stop_button)
+stop_Button.bind('<Button-3>', printFilename)
 stop_Button.pack()
 
 
@@ -138,17 +147,7 @@ volume_control.pack()
 volume_control.set(15)
 mixer.music.set_volume(15)
 
-button_1 = Button(window, text='click')
-button_1.bind('<Button-1>', leftClick)
-button_1.bind('<Button-2>', middleClick)
-button_1.bind('<Button-3>', rightClick)
-button_1.pack()
 
-#button_2 =  Button(window, command=rightClick)
-#button_2.pack()
-
-#utton_3 =  Button(window, command=middleClick)
-#button_3.pack()
 
 statusbar = Label(window, text = 'Cosmic Music App. Copyright 2019', relief = SUNKEN, anchor = CENTER)
 statusbar.pack(side = BOTTOM, fill = X)
